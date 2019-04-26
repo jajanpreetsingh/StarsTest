@@ -23,6 +23,13 @@ var scenes;
             _this.players = [];
             _this.maxPlayerCount = 4;
             _this.playerCount = 1;
+            _this.configurationCount = -1;
+            _this.configs = [
+                ["Ts", "Js", "7s", "2d", "Qs", "Ks", "As"],
+                ["Ts", "Js", "Ks", "2d", "Qs", "9s", "7h"],
+                ["Ah", "7d", "As", "Ad", "7s", "Ac", "7h"],
+                ["Kh", "7d", "As", "Ad", "7s", "Kc", "7h"]
+            ];
             _this.Init();
             return _this;
         }
@@ -37,6 +44,23 @@ var scenes;
         GameplayScene.prototype.Update = function () {
         };
         GameplayScene.prototype.Reset = function () {
+            this.removeAllChildren();
+            this.bg = null; //: objects.Background;
+            this.cards = []; //: objects.Card[] = [];
+            this.flopCards = []; //: objects.Card[] = [];
+            this.turnCard = null; //: objects.Card;
+            this.riverCard = null; //: objects.Card;
+            this.rearCard = null; //: objects.Card;
+            this.refDimen = null; //: math.Vec2;
+            this.communityCardCount = 0; //: number = 0;
+            this.commCardFirstPos = null; //: math.Vec2;
+            this.players = []; //: objects.Player[] = [];
+            this.playerCount = 1; //: number = 1;
+            this.dealButton = null; //: objects.Button;
+            this.dealText = null; //: objects.Label;
+            this.ResultButton = null; //: objects.Button;
+            this.resultText = null; //: objects.Label;
+            this.Start();
         };
         GameplayScene.prototype.Destroy = function () {
         };
@@ -84,6 +108,16 @@ var scenes;
             this.dealButton.addEventListener("click", this.DealPocketCards.bind(this));
             this.addChild(this.dealText);
             this.commCardFirstPos = this.dealButton.Position.AddX(this.refDimen.x * 1.5);
+            this.InitResultUI();
+        };
+        GameplayScene.prototype.InitResultUI = function () {
+            this.ResultButton = new objects.Button("amberNormal");
+            this.ResultButton.SetPosition(this.dealButton.Position.AddY(this.dealButton.OriginalWidth * 1.5));
+            this.addChild(this.ResultButton);
+            this.resultText = new objects.Label("Play", "30px", "Acme", utility.Colors.WHITE);
+            this.resultText.x = this.ResultButton.Position.x;
+            this.resultText.y = this.ResultButton.Position.y;
+            this.addChild(this.resultText);
         };
         GameplayScene.prototype.SetupBackground = function () {
             this.bg = new objects.Background();
@@ -107,7 +141,29 @@ var scenes;
                 this.players.push(p);
             }
         };
+        GameplayScene.prototype.LoadConfig = function () {
+            ++this.configurationCount; //starts from -1;
+            if (this.configurationCount >= 4)
+                return;
+            var config = this.configs[this.configurationCount];
+            var iAr = [];
+            for (var i = 0; i < config.length; i++) {
+                for (var j = 0; j < this.cards.length; j++) {
+                    if (this.cards[j].name == config[i]) {
+                        var c = this.cards[j];
+                        this.cards.splice(j, 1);
+                        iAr.push(c);
+                        console.log(iAr);
+                        break;
+                    }
+                }
+            }
+            this.cards = iAr.concat(this.cards);
+        };
         GameplayScene.prototype.DealPocketCards = function () {
+            if (this.configurationCount < 4) {
+                this.LoadConfig();
+            }
             var startPos = managers.GameManager.Screen.BottomCenter
                 .AddVec(-this.refDimen.x * 0.5, -this.refDimen.y * 0.5);
             //deal 2 cards to each player 
@@ -117,6 +173,7 @@ var scenes;
                     var c = this.cards[0];
                     this.cards.splice(0, 1);
                     this.players[j].pocketCards.push(c);
+                    this.players[j].pocketCards = this.players[j].pocketCards.sort(function (a, b) { return (a.cardType > b.cardType) ? 1 : -1; });
                     createjs.Tween.get(c).to({ x: newPos.x, y: newPos.y }, 500);
                 }
             }
@@ -126,7 +183,6 @@ var scenes;
             this.dealButton.addEventListener("click", this.RevealFlop.bind(this));
         };
         GameplayScene.prototype.RevealFlop = function () {
-            this.ShuffleCards();
             var startPos = this.commCardFirstPos;
             for (var i = 0; i < 3; i++) {
                 var newPos = startPos.AddX(this.communityCardCount * this.refDimen.x);
@@ -142,7 +198,6 @@ var scenes;
             this.dealButton.addEventListener("click", this.RevealTurn.bind(this));
         };
         GameplayScene.prototype.RevealTurn = function () {
-            this.ShuffleCards();
             var startPos = this.commCardFirstPos;
             var newPos = startPos.AddX(this.communityCardCount * this.refDimen.x);
             var c = this.cards[0];
@@ -156,7 +211,6 @@ var scenes;
             this.dealButton.addEventListener("click", this.RevealRiver.bind(this));
         };
         GameplayScene.prototype.RevealRiver = function () {
-            this.ShuffleCards();
             var startPos = this.commCardFirstPos;
             var newPos = startPos.AddX(this.communityCardCount * this.refDimen.x);
             var c = this.cards[0];
@@ -164,37 +218,42 @@ var scenes;
             createjs.Tween.get(c).to({ x: newPos.x, y: newPos.y }, 500);
             ++this.communityCardCount;
             this.riverCard = c;
-            this.dealText.text = "Deal Again";
+            this.dealText.text = "Reset";
             this.dealText.Recenter();
             this.dealButton.removeAllEventListeners();
             this.dealButton.addEventListener("click", this.Reset.bind(this));
-            //calculate hand rank
-        };
-        GameplayScene.prototype.CheckStraightFlush = function (player) {
-            if (player == null || player.pocketCards == null || player.pocketCards.length <= 0)
-                return false;
-            var rankCards = [];
-            rankCards.concat(player.pocketCards)
-                .concat(this.flopCards)
-                .concat(this.turnCard)
-                .concat(this.riverCard);
-            rankCards.sort(function (x) { return x.cardType; });
-            console.log(rankCards);
-            var result = false;
-            for (var i = 0; i < 3; i++) {
-                for (var j = i + 1; j < i + 5; i++) {
-                    if (rankCards[i].cardType + j == rankCards[j].cardType)
-                        continue;
+            var pR = new objects.PokerResults(this.players[0].pocketCards, this.flopCards, this.turnCard, this.riverCard);
+            pR.FindHandRank();
+            pR.GiveResults();
+            if (pR.resultCards != null && pR.resultCards.length > 0) {
+                this.players[0].pocketCards.forEach(function (x) {
+                    if (pR.resultCards.indexOf(x) >= 0) {
+                        x.alpha = 1;
+                    }
                     else
-                        break;
+                        x.alpha = 0.6;
+                });
+                this.flopCards.forEach(function (x) {
+                    if (pR.resultCards.indexOf(x) >= 0) {
+                        x.alpha = 1;
+                    }
+                    else
+                        x.alpha = 0.6;
+                });
+                if (pR.resultCards.indexOf(this.turnCard) >= 0) {
+                    this.turnCard.alpha = 1;
                 }
+                else
+                    this.turnCard.alpha = 0.6;
+                if (pR.resultCards.indexOf(this.riverCard) >= 0) {
+                    this.riverCard.alpha = 1;
+                }
+                else
+                    this.riverCard.alpha = 0.6;
             }
         };
         return GameplayScene;
     }(scenes.Scene));
     scenes.GameplayScene = GameplayScene;
-    var GameplayChildIndex;
-    (function (GameplayChildIndex) {
-    })(GameplayChildIndex = scenes.GameplayChildIndex || (scenes.GameplayChildIndex = {}));
 })(scenes || (scenes = {}));
 //# sourceMappingURL=gameplay-scene.js.map

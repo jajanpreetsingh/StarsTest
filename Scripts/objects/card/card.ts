@@ -2,7 +2,7 @@ module objects {
 
     export enum CardType {
         REAR_card_back_red,//     =                 "0",
-        TWO_2,//      =                 "2",
+        TWO_2 = 2,//      =                 "2",
         THREE_3,//        =                 "3",
         FOUR_4,//       =                 "4",
         FIVE_5,//       =                 "5",
@@ -44,6 +44,9 @@ module objects {
                 name += deck.substring(0, 1).toLowerCase();
             }
             super(name, new math.Vec2(0, 0), piv);
+
+            this.cardType = val;
+            this.setType = set;
 
             this.name = name;
 

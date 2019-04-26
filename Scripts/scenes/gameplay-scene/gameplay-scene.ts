@@ -28,6 +28,18 @@ module scenes {
         dealButton: objects.Button;
         dealText: objects.Label;
 
+        ResultButton: objects.Button;
+        resultText: objects.Label;
+
+        configurationCount: number = -1;
+
+        configs: string[][] = [
+            ["Ts", "Js", "7s", "2d", "Qs", "Ks", "As"],
+            ["Ts", "Js", "Ks", "2d", "Qs", "9s", "7h"],
+            ["Ah", "7d", "As", "Ad", "7s", "Ac", "7h"],
+            ["Kh", "7d", "As", "Ad", "7s", "Kc", "7h"]
+        ]
+
         constructor() {
             super();
 
@@ -50,6 +62,39 @@ module scenes {
         }
 
         public Reset(): void {
+
+            this.removeAllChildren();
+
+            this.bg = null;//: objects.Background;
+
+            this.cards = []//: objects.Card[] = [];
+
+            this.flopCards = []//: objects.Card[] = [];
+
+            this.turnCard = null;//: objects.Card;
+
+            this.riverCard = null;//: objects.Card;
+
+            this.rearCard = null;//: objects.Card;
+
+            this.refDimen = null;//: math.Vec2;
+
+            this.communityCardCount = 0//: number = 0;
+
+            this.commCardFirstPos = null;//: math.Vec2;
+
+            this.players = []//: objects.Player[] = [];
+
+            this.playerCount = 1//: number = 1;
+
+            this.dealButton = null//: objects.Button;
+            this.dealText = null//: objects.Label;
+
+            this.ResultButton = null//: objects.Button;
+            this.resultText = null//: objects.Label;
+
+            this.Start();
+
         }
 
         public Destroy(): void {
@@ -118,6 +163,20 @@ module scenes {
             this.addChild(this.dealText);
 
             this.commCardFirstPos = this.dealButton.Position.AddX(this.refDimen.x * 1.5);
+
+            this.InitResultUI();
+        }
+
+        InitResultUI(): void {
+            this.ResultButton = new objects.Button("amberNormal");
+            this.ResultButton.SetPosition(this.dealButton.Position.AddY(this.dealButton.OriginalWidth * 1.5));
+            this.addChild(this.ResultButton);
+
+            this.resultText = new objects.Label("Play", "30px", "Acme", utility.Colors.WHITE);
+            this.resultText.x = this.ResultButton.Position.x;
+            this.resultText.y = this.ResultButton.Position.y;
+
+            this.addChild(this.resultText);
         }
 
         SetupBackground(): void {
@@ -153,7 +212,44 @@ module scenes {
             }
         }
 
+        LoadConfig(): void {
+
+            ++this.configurationCount; //starts from -1;
+
+            if (this.configurationCount >= 4)
+                return;
+
+            let config: string[] = this.configs[this.configurationCount];
+
+            let iAr: objects.Card[] = [];
+
+            for (let i = 0; i < config.length; i++) {
+
+                for (let j = 0; j < this.cards.length; j++) {
+
+                    if (this.cards[j].name == config[i]) {
+
+                        let c: objects.Card = this.cards[j];
+
+                        this.cards.splice(j, 1);
+
+                        iAr.push(c);
+
+                        console.log(iAr);
+
+                        break;
+                    }
+                }
+            }
+
+            this.cards = iAr.concat(this.cards);
+        }
+
         DealPocketCards(): void {
+
+            if (this.configurationCount < 4) {
+                this.LoadConfig();
+            }
 
             let startPos: math.Vec2 = managers.GameManager.Screen.BottomCenter
                 .AddVec(-this.refDimen.x * 0.5, -this.refDimen.y * 0.5);
@@ -171,6 +267,8 @@ module scenes {
 
                     this.players[j].pocketCards.push(c);
 
+                    this.players[j].pocketCards = this.players[j].pocketCards.sort((a, b) => (a.cardType > b.cardType) ? 1 : -1);
+
                     createjs.Tween.get(c).to({ x: newPos.x, y: newPos.y }, 500);
                 }
             }
@@ -184,8 +282,6 @@ module scenes {
         }
 
         RevealFlop(): void {
-
-            this.ShuffleCards();
 
             let startPos: math.Vec2 = this.commCardFirstPos;
 
@@ -214,8 +310,6 @@ module scenes {
 
         RevealTurn(): void {
 
-            this.ShuffleCards();
-
             let startPos: math.Vec2 = this.commCardFirstPos;
 
             let newPos: math.Vec2 = startPos.AddX(this.communityCardCount * this.refDimen.x);
@@ -240,8 +334,6 @@ module scenes {
 
         RevealRiver(): void {
 
-            this.ShuffleCards();
-
             let startPos: math.Vec2 = this.commCardFirstPos;
 
             let newPos: math.Vec2 = startPos.AddX(this.communityCardCount * this.refDimen.x);
@@ -256,44 +348,52 @@ module scenes {
 
             this.riverCard = c;
 
-            this.dealText.text = "Deal Again";
+            this.dealText.text = "Reset";
             this.dealText.Recenter();
 
             this.dealButton.removeAllEventListeners();
 
             this.dealButton.addEventListener("click", this.Reset.bind(this));
 
-            //calculate hand rank
-        }
+            let pR: objects.PokerResults = new objects.PokerResults(this.players[0].pocketCards,
+                this.flopCards,
+                this.turnCard,
+                this.riverCard);
 
-        CheckStraightFlush(player: objects.Player): boolean {
-            if (player == null || player.pocketCards == null || player.pocketCards.length <= 0)
-                return false;
+            pR.FindHandRank();
 
-            let rankCards: objects.Card[] = [];
+            pR.GiveResults();
 
-            rankCards.concat(player.pocketCards)
-                .concat(this.flopCards)
-                .concat(this.turnCard)
-                .concat(this.riverCard);
+            if (pR.resultCards != null && pR.resultCards.length > 0) {
 
-            rankCards.sort(x => x.cardType);
-            console.log(rankCards);
-
-            let result: boolean = false;
-
-            for (let i = 0; i < 3; i++) {
-                for (let j = i + 1; j < i + 5; i++) {
-                    if (rankCards[i].cardType + j == rankCards[j].cardType)
-                        continue;
+                this.players[0].pocketCards.forEach(x => {
+                    if (pR.resultCards.indexOf(x) >= 0) {
+                        x.alpha = 1
+                    }
                     else
-                        break;
+                        x.alpha = 0.6;
+                });
+
+                this.flopCards.forEach(x => {
+                    if (pR.resultCards.indexOf(x) >= 0) {
+                        x.alpha = 1
+                    }
+                    else
+                        x.alpha = 0.6;
+                });
+
+                if (pR.resultCards.indexOf(this.turnCard) >= 0) {
+                    this.turnCard.alpha = 1
                 }
+                else
+                    this.turnCard.alpha = 0.6;
+
+                if (pR.resultCards.indexOf(this.riverCard) >= 0) {
+                    this.riverCard.alpha = 1
+                }
+                else
+                    this.riverCard.alpha = 0.6;
             }
-
         }
-    }
-
-    export enum GameplayChildIndex {
     }
 }
