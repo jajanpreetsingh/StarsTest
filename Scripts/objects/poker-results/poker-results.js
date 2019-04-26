@@ -215,6 +215,50 @@ var objects;
             return false;
         };
         PokerResults.prototype.CheckFullHouse = function () {
+            var firstCard = this.pocketCards[0];
+            var secondCard = this.pocketCards[1];
+            var otherCards = this.flopCards
+                .concat(this.turnCard)
+                .concat(this.riverCard)
+                .sort(function (a, b) { return (a.cardType > b.cardType) ? 1 : -1; });
+            if (firstCard.cardType == secondCard.cardType) {
+                //find a triplet
+                var triple = [];
+                var _loop_1 = function (i) {
+                    var filter = otherCards.filter(function (x) { return x.cardType == i; });
+                    if (filter == null || filter.length < 3)
+                        return "continue";
+                    triple = filter;
+                };
+                for (var i = objects.CardType.TWO_2; i <= objects.CardType.ACE_A; i++) {
+                    _loop_1(i);
+                }
+                if (triple != null && triple.length >= 3) {
+                    this.resultCards = this.resultCards.concat(this.pocketCards).concat(triple.splice(0, 3));
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else {
+                // try making them a pair or triple
+                var firstSiblings = otherCards.filter(function (x) { return x.cardType == firstCard.cardType; });
+                var secondSiblings = otherCards.filter(function (x) { return x.cardType == secondCard.cardType; });
+                if (firstSiblings != null
+                    && secondSiblings != null
+                    && firstSiblings.length >= 1 && secondSiblings.length >= 2) {
+                    this.resultCards = this.resultCards.concat(this.pocketCards).concat(firstSiblings[0]).concat(secondSiblings.splice(0, 2));
+                    return true;
+                }
+                else if (firstSiblings != null
+                    && secondSiblings != null
+                    && firstSiblings.length >= 2 && secondSiblings.length >= 1) {
+                    this.resultCards = this.resultCards.concat(this.pocketCards).concat(secondSiblings[0]).concat(firstSiblings.splice(0, 2));
+                    return true;
+                }
+                else
+                    return false;
+            }
             return false;
         };
         PokerResults.prototype.CheckFlush = function () {
@@ -371,7 +415,7 @@ var objects;
             if (firstCard.cardType == secondCard.cardType) {
                 //find second pair
                 var filter = [];
-                var _loop_1 = function (i) {
+                var _loop_2 = function (i) {
                     var iFil = [];
                     iFil = otherCards.filter(function (x) { return x.cardType == i; });
                     if (iFil != null && iFil.length >= 2) { // replaces with highest possible pair
@@ -379,7 +423,7 @@ var objects;
                     }
                 };
                 for (var i = objects.CardType.TWO_2; i <= objects.CardType.ACE_A; i++) {
-                    _loop_1(i);
+                    _loop_2(i);
                 }
                 if (filter != null && filter.length >= 2) { //third card
                     this.resultCards = this.resultCards.concat(this.pocketCards).concat(filter);

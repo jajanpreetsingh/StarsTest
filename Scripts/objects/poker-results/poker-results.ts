@@ -295,6 +295,57 @@ module objects {
 
         CheckFullHouse(): boolean {//triple and a pair
 
+            let firstCard: objects.Card = this.pocketCards[0];
+            let secondCard: objects.Card = this.pocketCards[1];
+
+            let otherCards = this.flopCards
+                .concat(this.turnCard)
+                .concat(this.riverCard)
+                .sort((a, b) => (a.cardType > b.cardType) ? 1 : -1);
+
+            if (firstCard.cardType == secondCard.cardType) {
+                //find a triplet
+
+                let triple = [];
+                for (let i = objects.CardType.TWO_2; i <= objects.CardType.ACE_A; i++) {
+                    let filter = otherCards.filter(x => x.cardType == i);
+
+                    if (filter == null || filter.length < 3)
+                        continue;
+                    triple = filter;
+                }
+
+                if (triple != null && triple.length >= 3) {
+                    this.resultCards = this.resultCards.concat(this.pocketCards).concat(triple.splice(0, 3));
+                    return true;
+                }
+                else
+                    return false;
+
+            }
+            else {
+                // try making them a pair or triple
+
+                let firstSiblings = otherCards.filter(x => x.cardType == firstCard.cardType);
+
+                let secondSiblings = otherCards.filter(x => x.cardType == secondCard.cardType);
+
+                if (firstSiblings != null
+                    && secondSiblings != null
+                    && firstSiblings.length >= 1 && secondSiblings.length >= 2) {
+                    this.resultCards = this.resultCards.concat(this.pocketCards).concat(firstSiblings[0]).concat(secondSiblings.splice(0, 2));
+                    return true;
+                }
+                else if (firstSiblings != null
+                    && secondSiblings != null
+                    && firstSiblings.length >= 2 && secondSiblings.length >= 1) {
+                    this.resultCards = this.resultCards.concat(this.pocketCards).concat(secondSiblings[0]).concat(firstSiblings.splice(0, 2));
+                    return true;
+                }
+                else return false;
+
+            }
+
             return false;
         }
 
