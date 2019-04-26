@@ -1,44 +1,5 @@
 module objects {
-    export class Button extends createjs.Bitmap {
-
-        private _imageUrl: string;
-        private _width: number;
-        private _height: number;
-
-        private _halfWidth: number;
-        private _halfHeight: number;
-
-        get Width(): number {
-            return this._width;
-        }
-
-        set Width(newWidth: number) {
-            this._width = newWidth;
-        }
-
-        get halfWidth(): number {
-            return this._halfWidth;
-        }
-
-        set halfWidth(newHalfWidth: number) {
-            this._halfWidth = newHalfWidth;
-        }
-
-        get Height(): number {
-            return this._height;
-        }
-
-        set Height(newHeight: number) {
-            this._height = newHeight;
-        }
-
-        get halfHeight(): number {
-            return this._halfHeight;
-        }
-
-        set halfHeight(newHalfHeight: number) {
-            this._halfHeight = newHalfHeight;
-        }
+    export class Button extends objects.BitmapGameObject {
 
         /**
          *Creates an instance of Button.
@@ -48,25 +9,9 @@ module objects {
          * @param {boolean} [isCentered=false]
          * @memberof Button
          */
-        constructor(imageString: string,
-            x: number = 0,
-            y: number = 0,
-            isCentered: boolean = false) {
+        constructor(imageString: string) {
 
-            super(managers.GameManager.ResourceManager.AssetManager.getResult(imageString));
-
-            this._imageUrl = imageString;
-
-            this.Width = this.getBounds().width;
-            this.Height = this.getBounds().height;
-
-            if(isCentered) {
-                this.regX = this.halfWidth;
-                this.regY = this.halfHeight;
-            }
-
-            this.x = x;
-            this.y = y;
+            super(imageString);
 
             this.on("mouseover", this._over);
 

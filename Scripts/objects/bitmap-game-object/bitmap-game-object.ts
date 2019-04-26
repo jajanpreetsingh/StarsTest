@@ -38,9 +38,11 @@ module objects {
 
             this._pivot = pivot;
 
-            this.SetScale(scale);
-
             this.name = imageString;
+
+            this.SetRegex();
+
+            this.SetScale(scale);
 
             this.Init();
         }
@@ -66,7 +68,7 @@ module objects {
             this.y = pos.y;
         }
 
-        private GetPivot(pivot: config.Pivot): math.Vec2 {
+        private GetNormalizedPivot(pivot: config.Pivot): math.Vec2 {
             switch (pivot) {
                 case config.Pivot.BOTTOMCENTER:
                     return new math.Vec2(0.5, 1);
@@ -101,11 +103,11 @@ module objects {
             this.scaleX = this.scaleY = value;
         }
 
-        private SetRegex(valueX: number, valueY: number): void {
-            let normPivot = this.GetPivot(this._pivot);
+        private SetRegex(): void {
+            let normPivot = this.GetNormalizedPivot(this._pivot);
 
-            this.regX = valueX;
-            this.regY = valueY;
+            this.regX = normPivot.x * this.OriginalWidth;
+            this.regY = normPivot.y * this.OriginalHeight;
         }
 
         public SetScales(valueX: number, valueY: number): void {

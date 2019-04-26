@@ -77,6 +77,20 @@ var config;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Screen.prototype, "BottomCenter", {
+            get: function () {
+                return new math.Vec2(this.Width * 0.5, this.Height);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Screen.prototype, "TopCenter", {
+            get: function () {
+                return new math.Vec2(this.Width * 0.5, 0);
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Screen.prototype, "MidRight", {
             get: function () {
                 return new math.Vec2(this.Width, this.Height * 0.5);

@@ -15,7 +15,7 @@ var objects;
 (function (objects) {
     var CardType;
     (function (CardType) {
-        CardType[CardType["REAR"] = 0] = "REAR";
+        CardType[CardType["REAR_card_back_red"] = 0] = "REAR_card_back_red";
         CardType[CardType["TWO_2"] = 1] = "TWO_2";
         CardType[CardType["THREE_3"] = 2] = "THREE_3";
         CardType[CardType["FOUR_4"] = 3] = "FOUR_4";
@@ -24,7 +24,7 @@ var objects;
         CardType[CardType["SEVEN_7"] = 6] = "SEVEN_7";
         CardType[CardType["EIGHT_8"] = 7] = "EIGHT_8";
         CardType[CardType["NINE_9"] = 8] = "NINE_9";
-        CardType[CardType["TEN_10"] = 9] = "TEN_10";
+        CardType[CardType["TEN_T"] = 9] = "TEN_T";
         CardType[CardType["JACK_J"] = 10] = "JACK_J";
         CardType[CardType["QUEEN_Q"] = 11] = "QUEEN_Q";
         CardType[CardType["KING_K"] = 12] = "KING_K";
@@ -39,15 +39,29 @@ var objects;
     })(DeckSet = objects.DeckSet || (objects.DeckSet = {}));
     var Card = /** @class */ (function (_super) {
         __extends(Card, _super);
-        function Card(val, set) {
+        function Card(val, set, piv) {
+            if (piv === void 0) { piv = config.Pivot.MIDCENTER; }
             var _this = this;
             var type = CardType[val].toString();
             var deck = DeckSet[set].toString();
-            var name = type.substring(1 + type.indexOf("_")) + deck.substring(0, 1).toLowerCase();
-            console.log(name);
-            _this = _super.call(this, name) || this;
+            var name = type.substring(1 + type.indexOf("_")).replace(/_/g, "-");
+            if (val != CardType.REAR_card_back_red) {
+                name += deck.substring(0, 1).toLowerCase();
+            }
+            _this = _super.call(this, name, new math.Vec2(0, 0), piv) || this;
+            _this.name = name;
+            if (_this.RotatedCardList().indexOf(name) >= 0) {
+                _this.rotation = -90;
+                _this.rotated = true;
+            }
+            else {
+                _this.rotated = false;
+            }
             return _this;
         }
+        Card.prototype.RotatedCardList = function () {
+            return ["8h", "8s", "8d", "9c", "Ah", "As", "Ad", "Kh", "Ks", "Jh", "Js", "Jd", "Qc", "Qs", "Qd", "Th", "Ts", "Tc",];
+        };
         return Card;
     }(objects.SpriteGameObject));
     objects.Card = Card;

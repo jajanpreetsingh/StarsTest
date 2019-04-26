@@ -13,8 +13,6 @@
 
     function Start(): void {
 
-        console.log("started");
-
         LoadSprites();
 
         canvas = document.getElementsByTagName("canvas")[0];
@@ -110,8 +108,6 @@
         managers.GameManager.CurrentScene = currentScene;
 
         stage.addChild(currentScene);
-
-        console.log(currentScene);
     }
 
     window.addEventListener("load", Init);

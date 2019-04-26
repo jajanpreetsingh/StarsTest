@@ -7,6 +7,8 @@ var resources;
             {
                 Sprites: [
                     { id: "bg", src: "./Assets/images/bg.png" },
+                    { id: "amberNormal", src: "./Assets/images/amberNormal.png" },
+                    { id: "amberDark", src: "./Assets/images/amberDark.png" },
                 ],
                 Sounds: [
                 //{ id: "buttonClick", src: "./Assets/audio/button.ogg" },

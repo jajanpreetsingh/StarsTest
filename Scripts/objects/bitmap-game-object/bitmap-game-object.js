@@ -20,8 +20,9 @@ var objects;
             if (pivot === void 0) { pivot = config.Pivot.MIDCENTER; }
             var _this = _super.call(this, managers.GameManager.ResourceManager.AssetManager.getResult(imageString)) || this;
             _this._pivot = pivot;
-            _this.SetScale(scale);
             _this.name = imageString;
+            _this.SetRegex();
+            _this.SetScale(scale);
             _this.Init();
             return _this;
         }
@@ -77,7 +78,7 @@ var objects;
             this.x = pos.x;
             this.y = pos.y;
         };
-        BitmapGameObject.prototype.GetPivot = function (pivot) {
+        BitmapGameObject.prototype.GetNormalizedPivot = function (pivot) {
             switch (pivot) {
                 case config.Pivot.BOTTOMCENTER:
                     return new math.Vec2(0.5, 1);
@@ -102,10 +103,10 @@ var objects;
         BitmapGameObject.prototype.SetScale = function (value) {
             this.scaleX = this.scaleY = value;
         };
-        BitmapGameObject.prototype.SetRegex = function (valueX, valueY) {
-            var normPivot = this.GetPivot(this._pivot);
-            this.regX = valueX;
-            this.regY = valueY;
+        BitmapGameObject.prototype.SetRegex = function () {
+            var normPivot = this.GetNormalizedPivot(this._pivot);
+            this.regX = normPivot.x * this.OriginalWidth;
+            this.regY = normPivot.y * this.OriginalHeight;
         };
         BitmapGameObject.prototype.SetScales = function (valueX, valueY) {
             this.scaleX = valueX;

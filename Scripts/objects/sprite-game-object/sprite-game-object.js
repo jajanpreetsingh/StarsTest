@@ -27,12 +27,9 @@ var objects;
             var _this = _super.call(this, managers.GameManager.TextureAtlas, imageString) || this;
             _this.name = imageString;
             _this._pivot = pivot;
-            if (pos == null) {
-                pos = new math.Vec2(0, 0);
-            }
-            _this.x = pos.x;
-            _this.y = pos.y;
-            var normPivot = _this.GetPivot(pivot);
+            _this._pivot = pivot;
+            _this.name = imageString;
+            _this.SetRegex();
             _this.Init();
             return _this;
         }
@@ -46,6 +43,20 @@ var objects;
         Object.defineProperty(SpriteGameObject.prototype, "OriginalHeight", {
             get: function () {
                 return this.getBounds().height;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(SpriteGameObject.prototype, "ActiveWidth", {
+            get: function () {
+                return this.OriginalWidth * this.scaleX;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(SpriteGameObject.prototype, "ActiveHeight", {
+            get: function () {
+                return this.OriginalHeight * this.scaleY;
             },
             enumerable: true,
             configurable: true
@@ -75,14 +86,26 @@ var objects;
         SpriteGameObject.prototype.Pivot = function () {
             return this._pivot;
         };
-        SpriteGameObject.prototype.GetPivot = function (pivot) {
+        SpriteGameObject.prototype.SetScale = function (value) {
+            this.scaleX = this.scaleY = value;
+        };
+        SpriteGameObject.prototype.SetRegex = function () {
+            var normPivot = this.GetNormalizedPivot(this._pivot);
+            this.regX = normPivot.x * this.OriginalWidth;
+            this.regY = normPivot.y * this.OriginalHeight;
+        };
+        SpriteGameObject.prototype.SetScales = function (valueX, valueY) {
+            this.scaleX = valueX;
+            this.scaleY = valueY;
+        };
+        SpriteGameObject.prototype.GetNormalizedPivot = function (pivot) {
             switch (pivot) {
                 case config.Pivot.BOTTOMCENTER:
-                    return new math.Vec2(0.5, 0);
+                    return new math.Vec2(0.5, 1);
                 case config.Pivot.BOTTOMLEFT:
-                    return new math.Vec2(0, 0);
+                    return new math.Vec2(0, 1);
                 case config.Pivot.BOTTOMRIGHT:
-                    return new math.Vec2(1, 0);
+                    return new math.Vec2(1, 1);
                 case config.Pivot.MIDCENTER:
                     return new math.Vec2(0.5, 0.5);
                 case config.Pivot.MIDLEFT:
@@ -90,11 +113,11 @@ var objects;
                 case config.Pivot.MIDRIGHT:
                     return new math.Vec2(1, 0.5);
                 case config.Pivot.TOPCENTER:
-                    return new math.Vec2(0.5, 1);
+                    return new math.Vec2(0.5, 0);
                 case config.Pivot.TOPLEFT:
-                    return new math.Vec2(0, 1);
+                    return new math.Vec2(0, 0);
                 case config.Pivot.TOPRIGHT:
-                    return new math.Vec2(1, 1);
+                    return new math.Vec2(1, 0);
             }
         };
         return SpriteGameObject;

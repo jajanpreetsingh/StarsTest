@@ -44,13 +44,14 @@ var objects;
             var _this = _super.call(this, labelSting, fontSize + " " + fontFamily, fontColor) || this;
             _this.Width = _this.getMeasuredWidth();
             _this.Height = _this.getMeasuredHeight();
-            return _this;
             // if (isCentered) {
             //     this.regX = this.halfWidth;
             //     this.regY = this.halfHeight; //regx,regy means anchor
             // }
             // this.x = x;
             // this.y = y;
+            _this.Recenter();
+            return _this;
         }
         Object.defineProperty(Label.prototype, "Width", {
             get: function () {
@@ -92,6 +93,10 @@ var objects;
             enumerable: true,
             configurable: true
         });
+        Label.prototype.Recenter = function () {
+            this.regX = this.getBounds().width * 0.5;
+            this.regY = this.getBounds().height * 0.5;
+        };
         return Label;
     }(createjs.Text));
     objects.Label = Label;

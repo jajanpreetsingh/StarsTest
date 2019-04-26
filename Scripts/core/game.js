@@ -7,7 +7,6 @@
         managers.GameManager.ResourceManager = new managers.ResourceManager(Start);
     }
     function Start() {
-        console.log("started");
         LoadSprites();
         canvas = document.getElementsByTagName("canvas")[0];
         var height = screen.availHeight - 120;
@@ -72,7 +71,6 @@
         }
         managers.GameManager.CurrentScene = currentScene;
         stage.addChild(currentScene);
-        console.log(currentScene);
     }
     window.addEventListener("load", Init);
 })();

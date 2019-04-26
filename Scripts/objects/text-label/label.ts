@@ -67,7 +67,7 @@ module objects {
             // x: number = 0,
             // y: number = 0,
             // isCentered: boolean = false
-            ) {
+        ) {
 
             super(labelSting, fontSize + " " + fontFamily, fontColor);
 
@@ -81,6 +81,13 @@ module objects {
 
             // this.x = x;
             // this.y = y;
+
+            this.Recenter();
+        }
+
+        Recenter(): void {
+            this.regX = this.getBounds().width * 0.5;
+            this.regY = this.getBounds().height * 0.5;
         }
     }
 }

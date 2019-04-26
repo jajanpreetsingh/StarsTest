@@ -53,6 +53,14 @@ module config {
             return new math.Vec2(0, this.Height * 0.5);
         }
 
+        get BottomCenter(): math.Vec2 {
+            return new math.Vec2(this.Width * 0.5, this.Height);
+        }
+
+        get TopCenter(): math.Vec2 {
+            return new math.Vec2(this.Width * 0.5, 0);
+        }
+
         get MidRight(): math.Vec2 {
             return new math.Vec2(this.Width, this.Height * 0.5);
         }

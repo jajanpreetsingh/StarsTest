@@ -16,6 +16,14 @@ module objects {
             return this.getBounds().height;
         }
 
+        get ActiveWidth(): number {
+            return this.OriginalWidth * this.scaleX;
+        }
+
+        get ActiveHeight(): number {
+            return this.OriginalHeight * this.scaleY;
+        }
+
         /**
       *Creates an instance of Button.
       * @param {string} imageString
@@ -31,14 +39,11 @@ module objects {
 
             this._pivot = pivot;
 
-            if (pos == null) {
-                pos = new math.Vec2(0, 0);
-            }
+            this._pivot = pivot;
 
-            this.x = pos.x;
-            this.y = pos.y;
+            this.name = imageString;
 
-            let normPivot = this.GetPivot(pivot);
+            this.SetRegex();
 
             this.Init();
         }
@@ -73,16 +78,32 @@ module objects {
             return this._pivot;
         }
 
-        private GetPivot(pivot: config.Pivot): math.Vec2 {
+        public SetScale(value: number): void {
+            this.scaleX = this.scaleY = value;
+        }
+
+        private SetRegex(): void {
+            let normPivot = this.GetNormalizedPivot(this._pivot);
+
+            this.regX = normPivot.x * this.OriginalWidth;
+            this.regY = normPivot.y * this.OriginalHeight;
+        }
+
+        public SetScales(valueX: number, valueY: number): void {
+            this.scaleX = valueX;
+            this.scaleY = valueY;
+        }
+
+        private GetNormalizedPivot(pivot: config.Pivot): math.Vec2 {
             switch (pivot) {
                 case config.Pivot.BOTTOMCENTER:
-                    return new math.Vec2(0.5, 0);
+                    return new math.Vec2(0.5, 1);
 
                 case config.Pivot.BOTTOMLEFT:
-                    return new math.Vec2(0, 0);
+                    return new math.Vec2(0, 1);
 
                 case config.Pivot.BOTTOMRIGHT:
-                    return new math.Vec2(1, 0);
+                    return new math.Vec2(1, 1);
 
                 case config.Pivot.MIDCENTER:
                     return new math.Vec2(0.5, 0.5);
@@ -94,13 +115,13 @@ module objects {
                     return new math.Vec2(1, 0.5);
 
                 case config.Pivot.TOPCENTER:
-                    return new math.Vec2(0.5, 1);
+                    return new math.Vec2(0.5, 0);
 
                 case config.Pivot.TOPLEFT:
-                    return new math.Vec2(0, 1);
+                    return new math.Vec2(0, 0);
 
                 case config.Pivot.TOPRIGHT:
-                    return new math.Vec2(1, 1);
+                    return new math.Vec2(1, 0);
             }
         }
     }
