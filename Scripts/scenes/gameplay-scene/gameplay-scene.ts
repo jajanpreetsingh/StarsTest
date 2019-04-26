@@ -169,10 +169,14 @@ module scenes {
 
         InitResultUI(): void {
             this.ResultButton = new objects.Button("amberNormal");
-            this.ResultButton.SetPosition(this.dealButton.Position.AddY(this.dealButton.OriginalWidth * 1.5));
+            this.ResultButton.scaleX = this.ResultButton.scaleY = 2;
+            this.ResultButton.SetPosition(managers.GameManager.Screen.TopLeft
+                .AddVec(this.dealButton.OriginalWidth * this.ResultButton.scaleX * 0.5
+                    , this.dealButton.OriginalHeight * this.ResultButton.scaleX * 0.5));
+
             this.addChild(this.ResultButton);
 
-            this.resultText = new objects.Label("Play", "30px", "Acme", utility.Colors.WHITE);
+            this.resultText = new objects.Label("Result", "50px", "Acme", utility.Colors.WHITE);
             this.resultText.x = this.ResultButton.Position.x;
             this.resultText.y = this.ResultButton.Position.y;
 
@@ -362,7 +366,10 @@ module scenes {
 
             pR.FindHandRank();
 
-            pR.GiveResults();
+            //pR.GiveResults();
+
+            this.resultText.text = pR.resultText;
+            this.resultText.Recenter();
 
             if (pR.resultCards != null && pR.resultCards.length > 0) {
 

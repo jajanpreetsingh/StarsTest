@@ -23,27 +23,60 @@ var objects;
             if (!result) {
                 result = this.CheckGroupFour();
             }
+            else {
+                this.resultText = "Straight Flush";
+                return;
+            }
             if (!result) {
                 result = this.CheckFullHouse();
+            }
+            else {
+                this.resultText = "4 of a Kind";
+                return;
             }
             if (!result) {
                 result = this.CheckFlush();
             }
+            else {
+                this.resultText = "Full House";
+                return;
+            }
             if (!result) {
                 result = this.CheckStraight();
+            }
+            else {
+                this.resultText = "Flush";
+                return;
             }
             if (!result) {
                 result = this.CheckGroupThree();
             }
+            else {
+                this.resultText = "Straight";
+                return;
+            }
             if (!result) {
                 result = this.CheckTwoPairs();
+            }
+            else {
+                this.resultText = "3 of a Kind";
+                return;
             }
             if (!result) {
                 result = this.CheckOnePair();
             }
+            else {
+                this.resultText = "2 Pairs";
+                return;
+            }
             if (!result) {
                 result = this.GiveHighCard();
             }
+            else {
+                this.resultText = "1 pair";
+                return;
+            }
+            this.resultText = "High Card";
         };
         PokerResults.prototype.CheckStraightFlush = function () {
             if (this.pocketCards == null || this.pocketCards.length <= 0)
